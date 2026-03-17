@@ -1,299 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>April Savings Sprint</title>
+    <title>Savings Sprint Tracker</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 15px;
-            color: #333;
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f7f6; 
+            margin: 0; 
+            padding: 15px; 
+            color: #333; 
         }
-
-        .container {
-            max-width: 500px;
-            margin: auto;
+        .container { max-width: 500px; margin: auto; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 5px;}
+        .header-controls { text-align: center; margin-bottom: 20px; }
+        .month-selector {
+            font-size: 16px; font-weight: bold; color: #2c3e50; 
+            padding: 8px 12px; border-radius: 6px; border: 1px solid #bdc3c7;
+            background-color: #fff; cursor: pointer;
         }
-
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 5px;
+        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+        .budget-box { background: #e8f4f8; padding: 15px 10px; border-radius: 8px; }
+        .budget-box h4 { margin: 0 0 8px 0; font-size: 13px; color: #2980b9; }
+        .budget-box .rem { font-size: 18px; font-weight: bold; color: #27ae60; }
+        .budget-box .rem.warning { color: #f39c12; }
+        .budget-box .rem.danger { color: #e74c3c; }
+        input, select, button { 
+            width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #ddd; 
+            border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: inherit;
         }
-
-        .subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-top: 0;
-            margin-bottom: 20px;
+        button { background-color: #2c3e50; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s;}
+        button:hover { background-color: #1a252f; }
+        ul { list-style-type: none; padding: 0; margin: 0; }
+        li { 
+            background: #fdfdfd; margin-top: 10px; padding: 12px; 
+            border-left: 4px solid #3498db; border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            text-align: center;
-        }
-
-        .budget-box {
-            background: #e8f4f8;
-            padding: 15px 10px;
-            border-radius: 8px;
-        }
-
-        .budget-box h4 {
-            margin: 0 0 8px 0;
-            font-size: 13px;
-            color: #2980b9;
-        }
-
-        .budget-box .rem {
-            font-size: 18px;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .budget-box .rem.warning {
-            color: #f39c12;
-        }
-
-        .budget-box .rem.danger {
-            color: #e74c3c;
-        }
-
-        input,
-        select,
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-            font-family: inherit;
-        }
-
-        button {
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: 0.2s;
-        }
-
-        button:hover {
-            background-color: #1a252f;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            background: #fdfdfd;
-            margin-top: 10px;
-            padding: 12px;
-            border-left: 4px solid #3498db;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tx-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .tx-title {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .tx-note {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 4px;
-        }
-
-        .tx-amount {
-            font-weight: bold;
-            color: #e74c3c;
-        }
-
-        .reset-btn {
-            background-color: #e74c3c;
-            margin-top: 30px;
-            font-size: 14px;
-            padding: 10px;
-        }
+        .tx-details { display: flex; flex-direction: column; }
+        .tx-title { font-weight: bold; font-size: 14px;}
+        .tx-note { font-size: 12px; color: #7f8c8d; margin-top: 4px;}
+        .tx-amount { font-weight: bold; color: #e74c3c; }
+        .delete-btn { color: #e74c3c; font-size: 12px; cursor: pointer; margin-top: 5px; text-decoration: underline; border: none; background: none; padding: 0; text-align: left;}
+        .export-btn { background-color: #27ae60; margin-top: 20px;}
+        .export-btn:hover { background-color: #219653; }
+        .reset-btn { background-color: #e74c3c; margin-top: 15px; font-size: 14px; padding: 10px;}
     </style>
 </head>
-
 <body>
 
-    <div class="container">
-        <h2>Shakti's Budget Tracker</h2>
-        <p class="subtitle">April 2026 • ₹5,000 Savings Sprint</p>
-
-        <div class="card">
-            <div class="grid">
-                <div class="budget-box">
-                    <h4>Entertainment</h4>
-                    <div class="rem" id="ent-rem">₹7500</div>
-                </div>
-                <div class="budget-box">
-                    <h4>Petrol</h4>
-                    <div class="rem" id="pet-rem">₹5000</div>
-                </div>
-                <div class="budget-box">
-                    <h4>Office Food</h4>
-                    <div class="rem" id="food-rem">₹1500</div>
-                </div>
+<div class="container">
+    <h2>Thakur's Budget Tracker</h2>
+    
+    <div class="header-controls">
+        <select id="view-month" class="month-selector" onchange="updateUI()"></select>
+    </div>
+    
+    <div class="card">
+        <div class="grid">
+            <div class="budget-box">
+                <h4>Entertainment</h4>
+                <div class="rem" id="ent-rem">₹7500</div>
+            </div>
+            <div class="budget-box">
+                <h4>Petrol</h4>
+                <div class="rem" id="pet-rem">₹5000</div>
+            </div>
+            <div class="budget-box">
+                <h4>Office Food</h4>
+                <div class="rem" id="food-rem">₹1500</div>
             </div>
         </div>
-
-        <div class="card">
-            <h3 style="margin-top:0;">Log Expense</h3>
-            <input type="date" id="exp-date" required>
-            <input type="number" id="exp-amount" placeholder="Amount (₹)" required>
-            <select id="exp-category">
-                <option value="ent">Entertainment & Others</option>
-                <option value="pet">Petrol</option>
-                <option value="food">Office Food</option>
-            </select>
-            <input type="text" id="exp-note" placeholder="Note (e.g., Netflix, Took the Avenger, etc.)">
-            <button onclick="addExpense()">Add Expense</button>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-top:0;">Recent Activity</h3>
-            <ul id="transaction-list"></ul>
-        </div>
-
-        <button class="reset-btn" onclick="resetData()">Reset All Data</button>
     </div>
 
-    <script>
-        // Set initial limits based on our plan
-        const limits = { ent: 7500, pet: 5000, food: 1500 };
+    <div class="card">
+        <h3 style="margin-top:0;">Log Expense</h3>
+        <input type="date" id="exp-date" required>
+        <input type="number" id="exp-amount" placeholder="Amount (₹)" required>
+        <select id="exp-category">
+            <option value="ent">Entertainment & Others</option>
+            <option value="pet">Petrol</option>
+            <option value="food">Office Food</option>
+        </select>
+        <input type="text" id="exp-note" placeholder="Note (e.g., Netflix, Bike fuel, etc.)">
+        <button onclick="addExpense()">Add Expense</button>
+    </div>
 
-        // Initialize state from LocalStorage or set defaults
-        let state = JSON.parse(localStorage.getItem('budgetState')) || {
-            spent: { ent: 0, pet: 0, food: 0 },
-            transactions: []
-        };
+    <div class="card">
+        <h3 style="margin-top:0;">Activity for <span id="history-title-month"></span></h3>
+        <ul id="transaction-list"></ul>
+    </div>
+    
+    <button class="export-btn" onclick="exportToCSV()">Export Data to Excel (CSV)</button>
+    <button class="reset-btn" onclick="resetData()">Reset All App Data</button>
+</div>
 
-        // Set today's date as default
-        document.getElementById('exp-date').valueAsDate = new Date();
+<script>
+    const limits = { ent: 7500, pet: 5000, food: 1500 };
+    let allData = JSON.parse(localStorage.getItem('budgetStateMulti')) || {};
 
-        function updateUI() {
-            // Calculate remaining balances
-            const remEnt = limits.ent - state.spent.ent;
-            const remPet = limits.pet - state.spent.pet;
-            const remFood = limits.food - state.spent.food;
+    function formatMonthName(yyyyMm) {
+        const [year, month] = yyyMm.split('-');
+        const date = new Date(year, month - 1);
+        return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
 
-            // Update dashboard text
-            document.getElementById('ent-rem').innerText = `₹${remEnt}`;
-            document.getElementById('pet-rem').innerText = `₹${remPet}`;
-            document.getElementById('food-rem').innerText = `₹${remFood}`;
+    function initMonthData(monthKey) {
+        if (!allData[monthKey]) {
+            allData[monthKey] = { spent: { ent: 0, pet: 0, food: 0 }, transactions: [] };
+        }
+    }
 
-            // Color coding for warnings
-            applyColor('ent-rem', remEnt, limits.ent);
-            applyColor('pet-rem', remPet, limits.pet);
-            applyColor('food-rem', remFood, limits.food);
+    function populateDropdown(activeMonthKey) {
+        const select = document.getElementById('view-month');
+        select.innerHTML = ''; 
+        
+        let keys = Object.keys(allData);
+        if (!keys.includes(activeMonthKey)) {
+            keys.push(activeMonthKey);
+            keys.sort(); 
+        }
 
-            // Update transaction list
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = '';
+        keys.forEach(key => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.text = formatMonthName(key);
+            if (key === activeMonthKey) option.selected = true;
+            select.appendChild(option);
+        });
+    }
 
-            // Show newest first
-            state.transactions.slice().reverse().forEach(tx => {
-                const li = document.createElement('li');
-                const catName = getCategoryName(tx.category);
+    function updateUI(forceMonthKey = null) {
+        const dropdown = document.getElementById('view-month');
+        let activeMonthKey = forceMonthKey || dropdown.value || new Date().toISOString().slice(0, 7);
+        
+        initMonthData(activeMonthKey);
+        populateDropdown(activeMonthKey);
+        
+        dropdown.value = activeMonthKey;
+        document.getElementById('history-title-month').innerText = formatMonthName(activeMonthKey);
 
-                li.innerHTML = `
+        const currentMonthData = allData[activeMonthKey];
+
+        const remEnt = limits.ent - currentMonthData.spent.ent;
+        const remPet = limits.pet - currentMonthData.spent.pet;
+        const remFood = limits.food - currentMonthData.spent.food;
+
+        document.getElementById('ent-rem').innerText = `₹${remEnt}`;
+        document.getElementById('pet-rem').innerText = `₹${remPet}`;
+        document.getElementById('food-rem').innerText = `₹${remFood}`;
+
+        applyColor('ent-rem', remEnt, limits.ent);
+        applyColor('pet-rem', remPet, limits.pet);
+        applyColor('food-rem', remFood, limits.food);
+
+        const list = document.getElementById('transaction-list');
+        list.innerHTML = '';
+        
+        if (currentMonthData.transactions.length === 0) {
+            list.innerHTML = '<li style="color:#7f8c8d; justify-content:center;">No expenses logged for this month yet.</li>';
+        }
+
+        currentMonthData.transactions.slice().reverse().forEach((tx, index) => {
+            const li = document.createElement('li');
+            const catName = getCategoryName(tx.category);
+            
+            li.innerHTML = `
                 <div class="tx-details">
                     <span class="tx-title">${catName} (${tx.date})</span>
                     <span class="tx-note">${tx.note || 'No note'}</span>
+                    <button class="delete-btn" onclick="deleteExpense('${activeMonthKey}', ${currentMonthData.transactions.length - 1 - index})">Delete</button>
                 </div>
                 <div class="tx-amount">-₹${tx.amount}</div>
             `;
-                list.appendChild(li);
+            list.appendChild(li);
+        });
+    }
+
+    function applyColor(elementId, remaining, limit) {
+        const el = document.getElementById(elementId);
+        el.className = 'rem'; 
+        if (remaining < limit * 0.2) el.classList.add('danger'); 
+        else if (remaining < limit * 0.5) el.classList.add('warning'); 
+    }
+
+    function getCategoryName(cat) {
+        if (cat === 'ent') return 'Entertainment';
+        if (cat === 'pet') return 'Petrol';
+        if (cat === 'food') return 'Office Food';
+    }
+
+    function addExpense() {
+        const dateInput = document.getElementById('exp-date').value;
+        const amount = parseInt(document.getElementById('exp-amount').value);
+        const category = document.getElementById('exp-category').value;
+        const note = document.getElementById('exp-note').value;
+
+        if (!dateInput || !amount || amount <= 0) {
+            alert("Please enter a valid date and amount.");
+            return;
+        }
+
+        const targetMonthKey = dateInput.slice(0, 7); 
+        initMonthData(targetMonthKey);
+
+        allData[targetMonthKey].spent[category] += amount;
+        allData[targetMonthKey].transactions.push({ date: dateInput, amount, category, note: note || '' });
+
+        localStorage.setItem('budgetStateMulti', JSON.stringify(allData));
+        updateUI(targetMonthKey);
+
+        document.getElementById('exp-amount').value = '';
+        document.getElementById('exp-note').value = '';
+    }
+
+    function deleteExpense(monthKey, index) {
+        const tx = allData[monthKey].transactions[index];
+        if (confirm(`Delete ₹${tx.amount} for ${getCategoryName(tx.category)}?`)) {
+            allData[monthKey].spent[tx.category] -= tx.amount;
+            allData[monthKey].transactions.splice(index, 1);
+            localStorage.setItem('budgetStateMulti', JSON.stringify(allData));
+            updateUI(monthKey);
+        }
+    }
+
+    function exportToCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Date,Month,Category,Amount,Note\n";
+
+        Object.keys(allData).sort().forEach(monthKey => {
+            const monthName = formatMonthName(monthKey);
+            allData[monthKey].transactions.forEach(tx => {
+                const categoryName = getCategoryName(tx.category);
+                // Clean up note text to avoid CSV formatting issues
+                const cleanNote = tx.note.replace(/,/g, " "); 
+                const row = `${tx.date},${monthName},${categoryName},${tx.amount},${cleanNote}`;
+                csvContent += row + "\n";
             });
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Thakur_Budget_Export.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function resetData() {
+        if (confirm("Are you sure you want to clear ALL data for ALL months? This cannot be undone.")) {
+            localStorage.removeItem('budgetStateMulti');
+            allData = {};
+            updateUI(new Date().toISOString().slice(0, 7));
         }
+    }
 
-        function applyColor(elementId, remaining, limit) {
-            const el = document.getElementById(elementId);
-            el.className = 'rem'; // reset
-            if (remaining < limit * 0.2) el.classList.add('danger'); // under 20%
-            else if (remaining < limit * 0.5) el.classList.add('warning'); // under 50%
-        }
-
-        function getCategoryName(cat) {
-            if (cat === 'ent') return 'Entertainment';
-            if (cat === 'pet') return 'Petrol';
-            if (cat === 'food') return 'Office Food';
-        }
-
-        function addExpense() {
-            const date = document.getElementById('exp-date').value;
-            const amount = parseInt(document.getElementById('exp-amount').value);
-            const category = document.getElementById('exp-category').value;
-            const note = document.getElementById('exp-note').value;
-
-            if (!amount || amount <= 0) {
-                alert("Please enter a valid amount.");
-                return;
-            }
-
-            // Update state
-            state.spent[category] += amount;
-            state.transactions.push({ date, amount, category, note });
-
-            // Save and refresh
-            localStorage.setItem('budgetState', JSON.stringify(state));
-            updateUI();
-
-            // Clear inputs
-            document.getElementById('exp-amount').value = '';
-            document.getElementById('exp-note').value = '';
-        }
-
-        function resetData() {
-            if (confirm("Are you sure you want to clear all data? This cannot be undone.")) {
-                localStorage.removeItem('budgetState');
-                state = { spent: { ent: 0, pet: 0, food: 0 }, transactions: [] };
-                updateUI();
-            }
-        }
-
-        // Initial load
-        updateUI();
-    </script>
+    document.getElementById('exp-date').valueAsDate = new Date();
+    updateUI(new Date().toISOString().slice(0, 7));
+</script>
 
 </body>
-
 </html>
