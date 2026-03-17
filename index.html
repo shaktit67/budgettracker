@@ -103,16 +103,32 @@
 
 <script>
     const limits = { ent: 7500, pet: 5000, food: 1500 };
-    let allData = JSON.parse(localStorage.getItem('budgetStateMulti')) || {};
+    const monthNamesArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    // Safety check for corrupted storage data
+    let rawData = localStorage.getItem('budgetStateMulti');
+    let allData = {};
+    try {
+        if (rawData) {
+            allData = JSON.parse(rawData);
+            if (Array.isArray(allData)) allData = {}; // Fix if old version saved an array
+        }
+    } catch (e) {
+        allData = {};
+    }
 
+    // Bulletproof month formatter
     function formatMonthName(yyyyMm) {
-        const [year, month] = yyyMm.split('-');
-        const date = new Date(year, month - 1);
-        return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        if (!yyyyMm || typeof yyyMm !== 'string' || !yyyyMm.includes('-')) return "Unknown Month";
+        const parts = yyyMm.split('-');
+        const year = parts[0];
+        const monthIndex = parseInt(parts[1], 10) - 1;
+        if (isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) return "Unknown Month";
+        return monthNamesArray[monthIndex] + " " + year;
     }
 
     function initMonthData(monthKey) {
-        if (!allData[monthKey]) {
+        if (!allData[monthKey] || typeof allData[monthKey] !== 'object') {
             allData[monthKey] = { spent: { ent: 0, pet: 0, food: 0 }, transactions: [] };
         }
     }
@@ -121,11 +137,13 @@
         const select = document.getElementById('view-month');
         select.innerHTML = ''; 
         
-        let keys = Object.keys(allData);
+        // Filter out any corrupted keys
+        let keys = Object.keys(allData).filter(k => k && k.includes('-'));
+        
         if (!keys.includes(activeMonthKey)) {
             keys.push(activeMonthKey);
-            keys.sort(); 
         }
+        keys.sort(); 
 
         keys.forEach(key => {
             const option = document.createElement('option');
@@ -138,7 +156,18 @@
 
     function updateUI(forceMonthKey = null) {
         const dropdown = document.getElementById('view-month');
-        let activeMonthKey = forceMonthKey || dropdown.value || new Date().toISOString().slice(0, 7);
+        
+        // Ensure a valid default month string
+        let todayStr = new Date().toISOString();
+        if (!todayStr) todayStr = "2026-03-01T00:00:00.000Z"; // Fallback
+        let currentYYYYMM = todayStr.slice(0, 7);
+
+        let activeMonthKey = forceMonthKey || dropdown.value || currentYYYYMM;
+        
+        // Failsafe
+        if (!activeMonthKey || !activeMonthKey.includes('-')) {
+            activeMonthKey = currentYYYYMM;
+        }
         
         initMonthData(activeMonthKey);
         populateDropdown(activeMonthKey);
@@ -148,9 +177,9 @@
 
         const currentMonthData = allData[activeMonthKey];
 
-        const remEnt = limits.ent - currentMonthData.spent.ent;
-        const remPet = limits.pet - currentMonthData.spent.pet;
-        const remFood = limits.food - currentMonthData.spent.food;
+        const remEnt = limits.ent - (currentMonthData.spent.ent || 0);
+        const remPet = limits.pet - (currentMonthData.spent.pet || 0);
+        const remFood = limits.food - (currentMonthData.spent.food || 0);
 
         document.getElementById('ent-rem').innerText = `₹${remEnt}`;
         document.getElementById('pet-rem').innerText = `₹${remPet}`;
@@ -163,28 +192,31 @@
         const list = document.getElementById('transaction-list');
         list.innerHTML = '';
         
-        if (currentMonthData.transactions.length === 0) {
+        if (!currentMonthData.transactions || currentMonthData.transactions.length === 0) {
             list.innerHTML = '<li style="color:#7f8c8d; justify-content:center;">No expenses logged for this month yet.</li>';
+        } else {
+            currentMonthData.transactions.slice().reverse().forEach((tx, index) => {
+                const li = document.createElement('li');
+                const catName = getCategoryName(tx.category);
+                // The true index in the original array is needed for deletion
+                const trueIndex = currentMonthData.transactions.length - 1 - index;
+                
+                li.innerHTML = `
+                    <div class="tx-details">
+                        <span class="tx-title">${catName} (${tx.date})</span>
+                        <span class="tx-note">${tx.note || 'No note'}</span>
+                        <button class="delete-btn" onclick="deleteExpense('${activeMonthKey}', ${trueIndex})">Delete</button>
+                    </div>
+                    <div class="tx-amount">-₹${tx.amount}</div>
+                `;
+                list.appendChild(li);
+            });
         }
-
-        currentMonthData.transactions.slice().reverse().forEach((tx, index) => {
-            const li = document.createElement('li');
-            const catName = getCategoryName(tx.category);
-            
-            li.innerHTML = `
-                <div class="tx-details">
-                    <span class="tx-title">${catName} (${tx.date})</span>
-                    <span class="tx-note">${tx.note || 'No note'}</span>
-                    <button class="delete-btn" onclick="deleteExpense('${activeMonthKey}', ${currentMonthData.transactions.length - 1 - index})">Delete</button>
-                </div>
-                <div class="tx-amount">-₹${tx.amount}</div>
-            `;
-            list.appendChild(li);
-        });
     }
 
     function applyColor(elementId, remaining, limit) {
         const el = document.getElementById(elementId);
+        if(!el) return;
         el.className = 'rem'; 
         if (remaining < limit * 0.2) el.classList.add('danger'); 
         else if (remaining < limit * 0.5) el.classList.add('warning'); 
@@ -194,6 +226,7 @@
         if (cat === 'ent') return 'Entertainment';
         if (cat === 'pet') return 'Petrol';
         if (cat === 'food') return 'Office Food';
+        return 'Unknown';
     }
 
     function addExpense() {
@@ -210,6 +243,8 @@
         const targetMonthKey = dateInput.slice(0, 7); 
         initMonthData(targetMonthKey);
 
+        if (!allData[targetMonthKey].spent[category]) allData[targetMonthKey].spent[category] = 0;
+        
         allData[targetMonthKey].spent[category] += amount;
         allData[targetMonthKey].transactions.push({ date: dateInput, amount, category, note: note || '' });
 
@@ -221,6 +256,8 @@
     }
 
     function deleteExpense(monthKey, index) {
+        if (!allData[monthKey] || !allData[monthKey].transactions[index]) return;
+        
         const tx = allData[monthKey].transactions[index];
         if (confirm(`Delete ₹${tx.amount} for ${getCategoryName(tx.category)}?`)) {
             allData[monthKey].spent[tx.category] -= tx.amount;
@@ -235,14 +272,17 @@
         csvContent += "Date,Month,Category,Amount,Note\n";
 
         Object.keys(allData).sort().forEach(monthKey => {
+            if (!monthKey.includes('-')) return; // Skip invalid keys
             const monthName = formatMonthName(monthKey);
-            allData[monthKey].transactions.forEach(tx => {
-                const categoryName = getCategoryName(tx.category);
-                // Clean up note text to avoid CSV formatting issues
-                const cleanNote = tx.note.replace(/,/g, " "); 
-                const row = `${tx.date},${monthName},${categoryName},${tx.amount},${cleanNote}`;
-                csvContent += row + "\n";
-            });
+            
+            if (allData[monthKey].transactions) {
+                allData[monthKey].transactions.forEach(tx => {
+                    const categoryName = getCategoryName(tx.category);
+                    const cleanNote = (tx.note || "").replace(/,/g, " "); 
+                    const row = `${tx.date},${monthName},${categoryName},${tx.amount},${cleanNote}`;
+                    csvContent += row + "\n";
+                });
+            }
         });
 
         const encodedUri = encodeURI(csvContent);
@@ -257,13 +297,32 @@
     function resetData() {
         if (confirm("Are you sure you want to clear ALL data for ALL months? This cannot be undone.")) {
             localStorage.removeItem('budgetStateMulti');
+            localStorage.removeItem('budgetState'); // Clear old single-month state too just in case
             allData = {};
-            updateUI(new Date().toISOString().slice(0, 7));
+            let todayStr = new Date().toISOString().slice(0, 7);
+            updateUI(todayStr);
         }
     }
 
-    document.getElementById('exp-date').valueAsDate = new Date();
-    updateUI(new Date().toISOString().slice(0, 7));
+    // Force date input to today immediately
+    const dateInputEl = document.getElementById('exp-date');
+    if (dateInputEl) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInputEl.value = `${yyyy}-${mm}-${dd}`;
+    }
+    
+    // Start the UI
+    try {
+        let initialMonth = new Date().toISOString().slice(0, 7);
+        updateUI(initialMonth);
+    } catch(e) {
+        console.error("Initialization error", e);
+        // Fallback initialization
+        updateUI("2026-03"); 
+    }
 </script>
 
 </body>
