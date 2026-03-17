@@ -5,68 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Savings Sprint Tracker</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2c3e50">
+    <meta name="theme-color" content="#3498db">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
+        /* Modern App Reset and Base Styles */
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f4f7f6; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f0f2f5; 
             margin: 0; 
-            padding: 15px; 
-            color: #333; 
+            padding: 15px 10px 40px 10px; 
+            color: #1c1e21; 
         }
         .container { max-width: 500px; margin: auto; }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px;}
-        .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .dashboard-title { text-align: center; color: #34495e; margin-top: 0; margin-bottom: 15px; font-size: 18px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;}
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
-        .budget-box { background: #e8f4f8; padding: 15px 10px; border-radius: 8px; }
-        .budget-box h4 { margin: 0 0 8px 0; font-size: 13px; color: #2980b9; }
-        .budget-box .rem { font-size: 18px; font-weight: bold; color: #27ae60; }
+        
+        /* App Header */
+        h2 { 
+            text-align: center; 
+            color: #2c3e50; 
+            margin-bottom: 25px; 
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Card Containers */
+        .card { 
+            background: #ffffff; 
+            padding: 24px; 
+            border-radius: 16px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+        }
+        
+        /* Dashboard Styling */
+        .dashboard-title { 
+            text-align: center; 
+            color: #34495e; 
+            margin-top: 0; 
+            margin-bottom: 20px; 
+            font-size: 18px; 
+            font-weight: 700;
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            text-align: center; 
+        }
+        .budget-box { 
+            background: #f8f9fa; 
+            padding: 16px 8px; 
+            border-radius: 12px; 
+            border: 1px solid #e9ecef;
+        }
+        .budget-box h4 { 
+            margin: 0 0 8px 0; 
+            font-size: 12px; 
+            color: #6c757d; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .budget-box .rem { 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: #2ecc71; 
+        }
         .budget-box .rem.warning { color: #f39c12; }
         .budget-box .rem.danger { color: #e74c3c; }
-        label { font-size: 14px; font-weight: bold; color: #7f8c8d; display: block; margin-top: 15px; }
-        input, select, button { 
-            width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; 
-            border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: inherit;
+
+        /* Form Inputs */
+        label { 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: #4a5568; 
+            display: block; 
+            margin-top: 16px; 
+            margin-bottom: 6px;
         }
-        input[type="date"] { border: 2px solid #3498db; background-color: #f0f8ff; font-weight: bold; color: #2c3e50;}
-        button { background-color: #2c3e50; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.2s;}
-        button:hover { background-color: #1a252f; }
+        input, select { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1px solid #ced4da; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            font-family: inherit;
+            background-color: #f8f9fa;
+            transition: all 0.2s ease;
+            color: #2c3e50;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        input[type="date"] { 
+            font-weight: 700; 
+            color: #2c3e50;
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+        }
+
+        /* Buttons */
+        button { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            margin-top: 10px;
+        }
+        button:active { transform: scale(0.98); }
+        
+        .add-btn { background-color: #3498db; color: white; margin-top: 24px; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);}
+        .add-btn:hover { background-color: #2980b9; }
+        
+        .export-btn { background-color: #27ae60; color: white; margin-top: 10px;}
+        .export-btn:hover { background-color: #219653; }
+        
+        .reset-btn { background-color: #ffffff; color: #e74c3c; border: 1px solid #e74c3c; margin-top: 10px;}
+        .reset-btn:hover { background-color: #fdf0ed; }
+
+        /* History List */
         ul { list-style-type: none; padding: 0; margin: 0; }
         li { 
-            background: #fdfdfd; margin-top: 10px; padding: 12px; 
-            border-left: 4px solid #3498db; border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-            display: flex; justify-content: space-between; align-items: center;
+            background: #ffffff; 
+            margin-top: 12px; 
+            padding: 16px; 
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
         }
         .tx-details { display: flex; flex-direction: column; }
-        .tx-title { font-weight: bold; font-size: 14px;}
-        .tx-note { font-size: 12px; color: #7f8c8d; margin-top: 4px;}
-        .tx-amount { font-weight: bold; color: #e74c3c; }
-        .delete-btn { color: #e74c3c; font-size: 12px; cursor: pointer; margin-top: 5px; text-decoration: underline; border: none; background: none; padding: 0; text-align: left;}
-        .export-btn { background-color: #27ae60; margin-top: 20px;}
-        .export-btn:hover { background-color: #219653; }
+        .tx-title { font-weight: 700; font-size: 15px; color: #2c3e50;}
+        .tx-note { font-size: 13px; color: #7f8c8d; margin-top: 4px;}
+        .tx-amount { font-weight: 800; color: #e74c3c; font-size: 16px;}
+        .delete-btn { 
+            color: #e74c3c; 
+            font-size: 13px; 
+            font-weight: 600;
+            cursor: pointer; 
+            margin-top: 6px; 
+            text-decoration: none; 
+            border: none; 
+            background: none; 
+            padding: 0; 
+            text-align: left;
+            width: auto;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Thakur's Budget Tracker v3</h2>
+    <h2>Thakur's Budget Tracker v4</h2>
     
-    <div class="card" style="border-top: 5px solid #3498db;">
-        <label for="exp-date">1. Select Date (This updates the dashboard below)</label>
+    <div class="card" style="border-top: 6px solid #3498db;">
+        <label for="exp-date">Date (Controls the Dashboard)</label>
         <input type="date" id="exp-date" onchange="renderApp()" required>
         
-        <label for="exp-amount">2. Log New Expense</label>
+        <label for="exp-amount">Log New Expense</label>
         <input type="number" id="exp-amount" placeholder="Amount (₹)" required>
         <select id="exp-category">
             <option value="ent">Entertainment & Others</option>
             <option value="pet">Petrol</option>
             <option value="food">Office Food</option>
         </select>
-        <input type="text" id="exp-note" placeholder="Note (e.g., Netflix, Bike fuel, etc.)">
-        <button onclick="addExpense()">Add Expense</button>
+        <input type="text" id="exp-note" placeholder="Note (e.g., Netflix, Bike fuel)">
+        <button class="add-btn" onclick="addExpense()">Add Expense</button>
     </div>
 
     <div class="card">
@@ -88,11 +200,12 @@
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; color: #2c3e50;">Monthly Activity</h3>
+        <h3 style="margin-top:0; color: #2c3e50; font-size: 18px; margin-bottom: 5px;">Monthly Activity</h3>
         <ul id="transaction-list"></ul>
     </div>
     
     <button class="export-btn" onclick="exportToCSV()">Export Data to Excel (CSV)</button>
+    <button class="reset-btn" onclick="resetData()">🚨 Reset All App Data</button>
 </div>
 
 <script>
@@ -100,7 +213,8 @@
         const limits = { ent: 7500, pet: 5000, food: 1500 };
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
-        let allData = JSON.parse(localStorage.getItem('ThakurBudgetDB_v3')) || {};
+        // Upgraded to v4 to ensure a clean slate if needed
+        let allData = JSON.parse(localStorage.getItem('ThakurBudgetDB_v4')) || {};
 
         function getMonthKey(dateStr) {
             return dateStr.substring(0, 7); 
@@ -144,7 +258,7 @@
             list.innerHTML = '';
             
             if (monthData.transactions.length === 0) {
-                list.innerHTML = '<li style="color:#7f8c8d; justify-content:center;">No expenses logged for this month yet.</li>';
+                list.innerHTML = '<li style="color:#adb5bd; justify-content:center; border: 1px dashed #ced4da; background: transparent;">No expenses logged for this month yet.</li>';
             } else {
                 monthData.transactions.slice().reverse().forEach((tx, index) => {
                     const li = document.createElement('li');
@@ -153,8 +267,8 @@
                     
                     li.innerHTML = `
                         <div class="tx-details">
-                            <span class="tx-title">${catName} (${tx.date})</span>
-                            <span class="tx-note">${tx.note || 'No note'}</span>
+                            <span class="tx-title">${catName} <span style="font-size:12px; color:#95a5a6; font-weight:normal;">(${tx.date})</span></span>
+                            <span class="tx-note">${tx.note || ''}</span>
                             <button class="delete-btn" onclick="deleteExpense('${monthKey}', ${trueIndex})">Delete</button>
                         </div>
                         <div class="tx-amount">-₹${tx.amount}</div>
@@ -187,7 +301,7 @@
                 const note = document.getElementById('exp-note').value;
 
                 if (!dateStr || isNaN(amount) || amount <= 0) {
-                    alert("⚠️ Please enter a valid date and a number for the amount.");
+                    alert("⚠️ Please enter a valid amount.");
                     return;
                 }
 
@@ -197,7 +311,7 @@
                 allData[monthKey].spent[category] += amount;
                 allData[monthKey].transactions.push({ date: dateStr, amount: amount, category: category, note: note });
 
-                localStorage.setItem('ThakurBudgetDB_v3', JSON.stringify(allData));
+                localStorage.setItem('ThakurBudgetDB_v4', JSON.stringify(allData));
 
                 document.getElementById('exp-amount').value = '';
                 document.getElementById('exp-note').value = '';
@@ -213,7 +327,7 @@
             if (confirm(`Delete ₹${tx.amount} for ${getCategoryName(tx.category)}?`)) {
                 allData[monthKey].spent[tx.category] -= tx.amount;
                 allData[monthKey].transactions.splice(index, 1);
-                localStorage.setItem('ThakurBudgetDB_v3', JSON.stringify(allData));
+                localStorage.setItem('ThakurBudgetDB_v4', JSON.stringify(allData));
                 renderApp();
             }
         };
@@ -237,6 +351,15 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        };
+
+        // Added Reset Functionality
+        window.resetData = function() {
+            if (confirm("🚨 WARNING: Are you sure you want to permanently delete ALL expenses for ALL months? This cannot be undone.")) {
+                localStorage.removeItem('ThakurBudgetDB_v4');
+                allData = {};
+                renderApp();
+            }
         };
 
         window.onload = function() {
