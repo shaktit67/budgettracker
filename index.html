@@ -105,25 +105,51 @@
     const limits = { ent: 7500, pet: 5000, food: 1500 };
     const monthNamesArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     
-    // Safety check for corrupted storage data
-    let rawData = localStorage.getItem('budgetStateMulti');
+    // --- SELF-CLEANING DATA LOADER ---
+    // Strict validator: Only accepts perfect "YYYY-MM" strings (e.g., "2026-03")
+    function isValidMonthKey(key) {
+        return typeof key === 'string' && /^\d{4}-\d{2}$/.test(key);
+    }
+
     let allData = {};
     try {
+        let rawData = localStorage.getItem('budgetStateMulti');
         if (rawData) {
-            allData = JSON.parse(rawData);
-            if (Array.isArray(allData)) allData = {}; // Fix if old version saved an array
+            let parsed = JSON.parse(rawData);
+            // Scrub out any garbage data keys
+            for (let k in parsed) {
+                if (isValidMonthKey(k)) {
+                    allData[k] = parsed[k];
+                }
+            }
         }
     } catch (e) {
         allData = {};
     }
+    // Save the cleaned data back immediately
+    localStorage.setItem('budgetStateMulti', JSON.stringify(allData));
 
-    // Bulletproof month formatter
+    // --- BULLETPROOF DATE GENERATORS ---
+    function getCurrentMonthKey() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        return `${yyyy}-${mm}`;
+    }
+
+    function getTodayDateString() {
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
     function formatMonthName(yyyyMm) {
-        if (!yyyyMm || typeof yyyMm !== 'string' || !yyyyMm.includes('-')) return "Unknown Month";
+        if (!isValidMonthKey(yyyyMm)) return "Error";
         const parts = yyyMm.split('-');
         const year = parts[0];
         const monthIndex = parseInt(parts[1], 10) - 1;
-        if (isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) return "Unknown Month";
         return monthNamesArray[monthIndex] + " " + year;
     }
 
@@ -137,9 +163,7 @@
         const select = document.getElementById('view-month');
         select.innerHTML = ''; 
         
-        // Filter out any corrupted keys
-        let keys = Object.keys(allData).filter(k => k && k.includes('-'));
-        
+        let keys = Object.keys(allData);
         if (!keys.includes(activeMonthKey)) {
             keys.push(activeMonthKey);
         }
@@ -156,17 +180,11 @@
 
     function updateUI(forceMonthKey = null) {
         const dropdown = document.getElementById('view-month');
-        
-        // Ensure a valid default month string
-        let todayStr = new Date().toISOString();
-        if (!todayStr) todayStr = "2026-03-01T00:00:00.000Z"; // Fallback
-        let currentYYYYMM = todayStr.slice(0, 7);
-
-        let activeMonthKey = forceMonthKey || dropdown.value || currentYYYYMM;
+        let activeMonthKey = forceMonthKey || dropdown.value;
         
         // Failsafe
-        if (!activeMonthKey || !activeMonthKey.includes('-')) {
-            activeMonthKey = currentYYYYMM;
+        if (!activeMonthKey || !isValidMonthKey(activeMonthKey)) {
+            activeMonthKey = getCurrentMonthKey();
         }
         
         initMonthData(activeMonthKey);
@@ -198,7 +216,6 @@
             currentMonthData.transactions.slice().reverse().forEach((tx, index) => {
                 const li = document.createElement('li');
                 const catName = getCategoryName(tx.category);
-                // The true index in the original array is needed for deletion
                 const trueIndex = currentMonthData.transactions.length - 1 - index;
                 
                 li.innerHTML = `
@@ -241,6 +258,11 @@
         }
 
         const targetMonthKey = dateInput.slice(0, 7); 
+        if(!isValidMonthKey(targetMonthKey)) {
+            alert("Date format error. Please select a valid date from the calendar.");
+            return;
+        }
+
         initMonthData(targetMonthKey);
 
         if (!allData[targetMonthKey].spent[category]) allData[targetMonthKey].spent[category] = 0;
@@ -272,7 +294,7 @@
         csvContent += "Date,Month,Category,Amount,Note\n";
 
         Object.keys(allData).sort().forEach(monthKey => {
-            if (!monthKey.includes('-')) return; // Skip invalid keys
+            if (!isValidMonthKey(monthKey)) return; 
             const monthName = formatMonthName(monthKey);
             
             if (allData[monthKey].transactions) {
@@ -297,32 +319,16 @@
     function resetData() {
         if (confirm("Are you sure you want to clear ALL data for ALL months? This cannot be undone.")) {
             localStorage.removeItem('budgetStateMulti');
-            localStorage.removeItem('budgetState'); // Clear old single-month state too just in case
+            localStorage.removeItem('budgetState'); 
             allData = {};
-            let todayStr = new Date().toISOString().slice(0, 7);
-            updateUI(todayStr);
+            updateUI(getCurrentMonthKey());
         }
     }
 
-    // Force date input to today immediately
-    const dateInputEl = document.getElementById('exp-date');
-    if (dateInputEl) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateInputEl.value = `${yyyy}-${mm}-${dd}`;
-    }
-    
-    // Start the UI
-    try {
-        let initialMonth = new Date().toISOString().slice(0, 7);
-        updateUI(initialMonth);
-    } catch(e) {
-        console.error("Initialization error", e);
-        // Fallback initialization
-        updateUI("2026-03"); 
-    }
+    // Initialize the app safely
+    document.getElementById('exp-date').value = getTodayDateString();
+    updateUI(getCurrentMonthKey());
+
 </script>
 
 </body>
